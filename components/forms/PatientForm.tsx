@@ -4,16 +4,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import CustomFormField from "../CustomFormField";
 
 // 表單綱要
 const formSchema = z.object({
@@ -22,9 +15,19 @@ const formSchema = z.object({
   }),
 });
 
+// 枚舉表單元素 type
+export enum FormFieldTypes {
+  INPUT = "input",
+  TEXTAREA = "textarea",
+  PHONE_INPUT = "phone_input",
+  CHECKBOX = "checkbox",
+  DATE_PICKER = "datePicker",
+  SELECT = "select",
+  SKELETON = "skeleton",
+}
+
 const PatientForm = () => {
   // 表單狀態管理
-  // 建立 form object
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -44,22 +47,16 @@ const PatientForm = () => {
           <p className="text-dark-700">Schedule your first appointment</p>
         </section>
 
-        <FormField
+        <CustomFormField
           control={form.control}
-          name="username"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Username</FormLabel>
-              <FormControl>
-                <Input placeholder="shadcn" {...field} />
-              </FormControl>
-              <FormDescription>
-                This is your public display name.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
+          fieldType={FormFieldTypes.INPUT}
+          name="name"
+          label="Full name"
+          placeholder="John Doe"
+          iconSrc="/assets/icons/user.svg"
+          iconAlt="user"
         />
+
         <Button type="submit">Submit</Button>
       </form>
     </Form>
