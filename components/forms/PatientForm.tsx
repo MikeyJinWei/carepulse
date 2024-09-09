@@ -3,12 +3,12 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import CustomFormField from "../CustomFormField";
 import SubmitButton from "../SubmitButton";
 import { useState } from "react";
 import { UserFormValidation } from "@/lib/validation";
+import { useRouter } from "next/navigation";
 
 // 枚舉表單元素 type
 export enum FormFieldType {
@@ -22,14 +22,11 @@ export enum FormFieldType {
 }
 
 const PatientForm = () => {
+  const router = useRouter();
+
   // 表單提交
-  const [isLoading, setIsLoading] = useState(false); // 之後嘗試看看 useTransition
-
-  function onSubmit(values: z.infer<typeof UserFormValidation>) {
-    console.log(values);
-  }
-
-  // 表單狀態管理
+  const [isLoading, setIsLoading] = useState(false); // 提交裝態，之後嘗試看看 useTransition
+  // 表單欄位狀態管理
   const form = useForm<z.infer<typeof UserFormValidation>>({
     resolver: zodResolver(UserFormValidation),
     defaultValues: {
@@ -38,6 +35,26 @@ const PatientForm = () => {
       phone: "",
     },
   });
+  // 發出 req
+  async function onSubmit({
+    name,
+    email,
+    phone,
+  }: z.infer<typeof UserFormValidation>) {
+    setIsLoading(true);
+
+    try {
+      // const userData = {
+      //   name,
+      //   email,
+      //   phone,
+      // }; // 檢查必要表單資料 truthy, falsy
+      // const user = await createUser(userData); // fetch api
+      // if (user) router.push(`/patients/${user.$id}/register`); // 重導路由
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   return (
     <Form {...form}>
