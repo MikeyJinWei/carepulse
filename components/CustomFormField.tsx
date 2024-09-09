@@ -10,11 +10,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Control } from "react-hook-form";
-import { FormFieldTypes } from "./forms/PatientForm";
+import { FormFieldType } from "./forms/PatientForm";
+import Image from "next/image";
+import "react-phone-number-input/style.css";
+import PhoneInput from "react-phone-number-input";
 
 interface CustomFormFieldProps {
   control: Control<any>;
-  fieldType: FormFieldTypes;
+  fieldType: FormFieldType;
   name: string;
   label?: string;
   placeholder?: string;
@@ -35,7 +38,45 @@ const RenderField = ({
   field: any;
   props: CustomFormFieldProps;
 }) => {
-  return <Input type="text" placeholder="John Doe" />;
+  const { fieldType, iconSrc, iconAlt, placeholder } = props;
+
+  switch (fieldType) {
+    case FormFieldType.INPUT:
+      return (
+        <div className="flex border rounded-md border-dark-500 bg-dark-400">
+          {iconSrc && (
+            <Image
+              src={iconSrc}
+              height={24}
+              width={24}
+              alt={iconAlt || "icon"}
+              className="ml-2"
+            />
+          )}
+          <FormControl>
+            <Input
+              placeholder={placeholder}
+              {...field}
+              className="shad-input border-0"
+            />
+          </FormControl>
+        </div>
+      );
+    case FormFieldType.PHONE_INPUT:
+      return (
+        <FormControl>
+          <PhoneInput
+            defaultCountry="US"
+            placeholder={placeholder}
+            international
+            withCountryCallingCode
+            value={field.value} // 待確定是否會轉換成 E164
+            onChange={field.onChange}
+            className="input-phone"
+          />
+        </FormControl>
+      );
+  }
 };
 
 const CustomFormField = (props: CustomFormFieldProps) => {
@@ -48,7 +89,7 @@ const CustomFormField = (props: CustomFormFieldProps) => {
       name={name}
       render={({ field }) => (
         <FormItem>
-          {fieldType !== FormFieldTypes.CHECKBOX && label && (
+          {fieldType !== FormFieldType.CHECKBOX && label && (
             <FormLabel>{label}</FormLabel>
           )}
 

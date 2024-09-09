@@ -5,18 +5,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import CustomFormField from "../CustomFormField";
-
-// 表單綱要
-const formSchema = z.object({
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
-});
+import SubmitButton from "../SubmitButton";
+import { useState } from "react";
+import { UserFormValidation } from "@/lib/validation";
 
 // 枚舉表單元素 type
-export enum FormFieldTypes {
+export enum FormFieldType {
   INPUT = "input",
   TEXTAREA = "textarea",
   PHONE_INPUT = "phone_input",
@@ -27,17 +22,22 @@ export enum FormFieldTypes {
 }
 
 const PatientForm = () => {
-  // 表單狀態管理
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      username: "",
-    },
-  });
+  // 表單提交
+  const [isLoading, setIsLoading] = useState(false); // 之後嘗試看看 useTransition
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof UserFormValidation>) {
     console.log(values);
   }
+
+  // 表單狀態管理
+  const form = useForm<z.infer<typeof UserFormValidation>>({
+    resolver: zodResolver(UserFormValidation),
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+    },
+  });
 
   return (
     <Form {...form}>
@@ -49,7 +49,7 @@ const PatientForm = () => {
 
         <CustomFormField
           control={form.control}
-          fieldType={FormFieldTypes.INPUT}
+          fieldType={FormFieldType.INPUT}
           name="name"
           label="Full name"
           placeholder="John Doe"
@@ -57,7 +57,25 @@ const PatientForm = () => {
           iconAlt="user"
         />
 
-        <Button type="submit">Submit</Button>
+        <CustomFormField
+          control={form.control}
+          fieldType={FormFieldType.INPUT}
+          name="email"
+          label="Email"
+          placeholder="johndoe@mail.com"
+          iconSrc="/assets/icons/email.svg"
+          iconAlt="email"
+        />
+
+        <CustomFormField
+          control={form.control}
+          fieldType={FormFieldType.PHONE_INPUT}
+          name="phone"
+          label="Phone number"
+          placeholder="(555) 123-4567"
+        />
+
+        <SubmitButton isLoading={isLoading}>Get Started</SubmitButton>
       </form>
     </Form>
   );
