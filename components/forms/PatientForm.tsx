@@ -9,6 +9,7 @@ import SubmitButton from "../SubmitButton";
 import { useState } from "react";
 import { UserFormValidation } from "@/lib/validation";
 import { useRouter } from "next/navigation";
+import { createUser } from "@/lib/actions/patient.action";
 
 // 枚舉表單元素 type
 export enum FormFieldType {
@@ -36,25 +37,30 @@ const PatientForm = () => {
     },
   });
   // 發出 req
-  async function onSubmit({
+  const onSubmit = async ({
     name,
     email,
     phone,
-  }: z.infer<typeof UserFormValidation>) {
+  }: z.infer<typeof UserFormValidation>) => {
     setIsLoading(true);
 
     try {
-      // const userData = {
-      //   name,
-      //   email,
-      //   phone,
-      // }; // 檢查必要表單資料 truthy, falsy
-      // const user = await createUser(userData); // fetch api
-      // if (user) router.push(`/patients/${user.$id}/register`); // 重導路由
+      const userData = {
+        name,
+        email,
+        phone,
+      }; // 檢查必要表單資料 truthy, falsy
+
+      // fetch api
+      const newUser = await createUser(userData); // 將 variable 修正成更明確的 naming
+
+      if (newUser) router.push(`/patients/${newUser.$id}/register`); // 重導路由
     } catch (error) {
       console.error(error);
     }
-  }
+
+    setIsLoading(false); // 結束提交狀態
+  };
 
   return (
     <Form {...form}>
