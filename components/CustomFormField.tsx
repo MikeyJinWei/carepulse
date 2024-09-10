@@ -10,10 +10,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Control } from "react-hook-form";
-import { FormFieldType } from "./forms/PatientForm";
 import Image from "next/image";
 import "react-phone-number-input/style.css";
 import PhoneInput from "react-phone-number-input";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 interface CustomFormFieldProps {
   control: Control<any>;
@@ -30,6 +31,17 @@ interface CustomFormFieldProps {
   renderSkeleton?: (field: any) => React.ReactNode;
 }
 
+// 枚舉欄位元素的種類
+export enum FormFieldType {
+  INPUT = "input",
+  TEXTAREA = "textarea",
+  PHONE_INPUT = "phone_input",
+  CHECKBOX = "checkbox",
+  DATE_PICKER = "datePicker",
+  SELECT = "select",
+  SKELETON = "skeleton",
+}
+
 // 彈性控制欄位要渲染的元素
 const RenderField = ({
   field,
@@ -38,7 +50,14 @@ const RenderField = ({
   field: any;
   props: CustomFormFieldProps;
 }) => {
-  const { fieldType, iconSrc, iconAlt, placeholder } = props;
+  const {
+    fieldType,
+    iconSrc,
+    iconAlt,
+    placeholder,
+    showTimeSelect,
+    dateFormat,
+  } = props;
 
   switch (fieldType) {
     case FormFieldType.INPUT:
@@ -76,6 +95,28 @@ const RenderField = ({
           />
         </FormControl>
       );
+    case FormFieldType.DATE_PICKER:
+      return (
+        <div className="flex border rounded-md border-dark-500 bg-dark-400">
+          <Image
+            src="/assets/icons/calendar.svg"
+            height={24}
+            width={24}
+            alt="calendar"
+            className="ml-2"
+          />
+          <FormControl>
+            <DatePicker
+              selected={field.value} // 設定選中的日期為值
+              onChange={(date) => field.onChange(date)} // 依使用者選擇更新日期
+              showTimeSelect={showTimeSelect ?? false} // 是否顯示時間選擇器，預設為 false
+              dateFormat={dateFormat ?? "MM/dd/yyyy"} // 日期格式
+              timeInputLabel="Time:" // 時間選擇器的標籤
+              wrapperClassName="date-picker" // 添加外層容器控制 CSS
+            />
+          </FormControl>
+        </div>
+      );
   }
 };
 
@@ -88,7 +129,7 @@ const CustomFormField = (props: CustomFormFieldProps) => {
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem>
+        <FormItem className="flex-1">
           {fieldType !== FormFieldType.CHECKBOX && label && (
             <FormLabel>{label}</FormLabel>
           )}
@@ -96,13 +137,6 @@ const CustomFormField = (props: CustomFormFieldProps) => {
           <RenderField field={field} props={props} />
 
           <FormMessage className="shad-error" />
-
-          {/* <FormLabel>Username</FormLabel>
-          <FormControl>
-            <Input placeholder="shadcn" {...field} type={fieldType} />
-          </FormControl>
-          <FormDescription>This is your public display name.</FormDescription>
-          <FormMessage /> */}
         </FormItem>
       )}
     />
