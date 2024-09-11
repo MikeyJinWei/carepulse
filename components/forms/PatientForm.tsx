@@ -14,8 +14,8 @@ import { createUser } from "@/lib/actions/patient.action";
 const PatientForm = () => {
   const router = useRouter();
 
-  // 表單提交
-  const [isLoading, setIsLoading] = useState(false); // 提交裝態，之後嘗試看看 useTransition
+  // 表單提交裝態
+  const [isLoading, setIsLoading] = useState(false); // 之後嘗試看看 useTransition
   // 表單欄位狀態管理
   const form = useForm<z.infer<typeof UserFormValidation>>({
     resolver: zodResolver(UserFormValidation),
@@ -25,7 +25,7 @@ const PatientForm = () => {
       phone: "",
     },
   });
-  // 發出 req
+  // 表單提交 req
   const onSubmit = async ({
     name,
     email,

@@ -11,13 +11,15 @@ import { useRouter } from "next/navigation";
 import CustomFormField, { FormFieldType } from "../CustomFormField";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
-import { GenderOptions } from "@/constants";
+import { Doctors, GenderOptions, IdentificationTypes } from "@/constants";
+import { SelectItem } from "../ui/select";
+import Image from "next/image";
 
 const RegisterForm = ({ user }: { user: User }) => {
   const router = useRouter();
 
-  // 表單提交
-  const [isLoading, setIsLoading] = useState(false); // 提交裝態，之後嘗試看看 useTransition
+  // 表單提交裝態
+  const [isLoading, setIsLoading] = useState(false); // 之後嘗試看看 useTransition
   // 表單欄位狀態管理
   const form = useForm<z.infer<typeof UserFormValidation>>({
     resolver: zodResolver(UserFormValidation),
@@ -27,7 +29,7 @@ const RegisterForm = ({ user }: { user: User }) => {
       phone: "",
     },
   });
-  // 發出 req
+  // 表單提交 req
   const onSubmit = async () => {};
 
   return (
@@ -41,6 +43,7 @@ const RegisterForm = ({ user }: { user: User }) => {
           <p className="text-dark-700">Let us know more about yourself</p>
         </section>
 
+        {/* Start Personal Information */}
         <section className="space-y-6">
           <div className="mb-9 space-y-1">
             <h2 className="sub-header">Personal Information</h2>
@@ -68,7 +71,6 @@ const RegisterForm = ({ user }: { user: User }) => {
             iconSrc="/assets/icons/email.svg"
             iconAlt="email"
           />
-
           <CustomFormField
             control={form.control}
             fieldType={FormFieldType.PHONE_INPUT}
@@ -86,7 +88,6 @@ const RegisterForm = ({ user }: { user: User }) => {
             label="Date of birth"
             placeholder="Select your birth date"
           />
-
           <CustomFormField
             control={form.control}
             fieldType={FormFieldType.SKELETON}
@@ -112,6 +113,161 @@ const RegisterForm = ({ user }: { user: User }) => {
             )}
           />
         </div>
+
+        <div className="flex flex-col gap-6 xl:flex-row">
+          <CustomFormField
+            control={form.control}
+            fieldType={FormFieldType.INPUT}
+            name="address"
+            label="Address"
+            placeholder="ex: 14 street, New York, NY - 5101"
+          />
+          <CustomFormField
+            control={form.control}
+            fieldType={FormFieldType.INPUT}
+            name="occupation"
+            label="Occupation"
+            placeholder="Engineer"
+          />
+        </div>
+
+        <div className="flex flex-col gap-6 xl:flex-row">
+          <CustomFormField
+            control={form.control}
+            fieldType={FormFieldType.INPUT}
+            name="emergencyContactName"
+            label="Emergency contact name"
+            placeholder="Guardian’s name"
+          />
+          <CustomFormField
+            control={form.control}
+            fieldType={FormFieldType.PHONE_INPUT}
+            name="emergencyContactNumber"
+            label="Emergency contact number"
+            placeholder="(555) 123-4567"
+          />
+        </div>
+        {/* End Personal Information */}
+        {/* Start Medical Information */}
+        <section className="space-y-6">
+          <div className="mb-9 space-y-1">
+            <h2 className="sub-header">Medical Information</h2>
+          </div>
+        </section>
+
+        <CustomFormField
+          control={form.control}
+          fieldType={FormFieldType.SELECT}
+          name="primaryPhysician"
+          label="Primary care physician"
+          placeholder="Select a physician"
+        >
+          {Doctors.map((doctor) => (
+            <SelectItem value={doctor.name} key={doctor.name}>
+              <div className="flex items-center gap-2 cursor-pointer">
+                <Image
+                  src={doctor.image}
+                  height={32}
+                  width={32}
+                  alt="doctor"
+                  className="border rounded-full border-dark-500"
+                />
+                <p>{doctor.name}</p>
+              </div>
+            </SelectItem>
+          ))}
+        </CustomFormField>
+
+        <div className="flex flex-col gap-6 xl:flex-row">
+          <CustomFormField
+            control={form.control}
+            fieldType={FormFieldType.INPUT}
+            name="insuranceProvider"
+            label="Insurance provider"
+            placeholder="ex: BlueCross"
+          />
+          <CustomFormField
+            control={form.control}
+            fieldType={FormFieldType.INPUT}
+            name="insurancePolicyNumber"
+            label="Insurance policy number"
+            placeholder="ex: ABC1234567"
+          />
+        </div>
+
+        <div className="flex flex-col gap-6 xl:flex-row">
+          <CustomFormField
+            control={form.control}
+            fieldType={FormFieldType.TEXTAREA}
+            name="allergies"
+            label="Allergies (if any)"
+            placeholder="ex: Peanuts, Penicillin, Pollen"
+          />
+          <CustomFormField
+            control={form.control}
+            fieldType={FormFieldType.TEXTAREA}
+            name="currentMedications"
+            label="Current medications (if any)"
+            placeholder="ex: Ibuprofen 200mg, Levothyroxine 50mcg"
+          />
+        </div>
+
+        <div className="flex flex-col gap-6 xl:flex-row">
+          <CustomFormField
+            control={form.control}
+            fieldType={FormFieldType.TEXTAREA}
+            name="familyMedicalHistory"
+            label="Family medical history (if relevant)"
+            placeholder="ex: Mother had breast cancer"
+          />
+          <CustomFormField
+            control={form.control}
+            fieldType={FormFieldType.TEXTAREA}
+            name="pastMedicalHistory"
+            label="Past medical history"
+            placeholder="ex: Asthma diagnosis in childhood"
+          />
+        </div>
+        {/* End Medical Information */}
+        {/* Start Identification and Verification  */}
+        <section className="space-y-6">
+          <div className="mb-9 space-y-1">
+            <h2 className="sub-header">Identification and Verification</h2>
+          </div>
+        </section>
+
+        <CustomFormField
+          control={form.control}
+          fieldType={FormFieldType.SELECT}
+          name="identificationType"
+          label="Identification type"
+          placeholder="Select an identification type"
+        >
+          {IdentificationTypes.map((type) => (
+            <SelectItem value={type} key={type}>
+              <p>{type}</p>
+            </SelectItem>
+          ))}
+        </CustomFormField>
+
+        <CustomFormField
+          control={form.control}
+          fieldType={FormFieldType.INPUT}
+          name="identificationNumber"
+          label="Identification Number"
+          placeholder="ex: 1234567"
+        />
+
+        <CustomFormField
+          control={form.control}
+          fieldType={FormFieldType.SKELETON}
+          name="identificationDocument" // 待確認對應的 collection attr 名稱
+          label="Scanned Copy of Identification Document"
+          renderSkeleton={(field) => (
+            <FormControl>{/* FileUpload */}</FormControl>
+          )}
+        />
+        {/* End Identification and Verification  */}
 
         <SubmitButton isLoading={isLoading}>Get Started</SubmitButton>
       </form>
