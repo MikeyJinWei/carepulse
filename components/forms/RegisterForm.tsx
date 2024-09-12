@@ -14,6 +14,7 @@ import { Label } from "../ui/label";
 import { Doctors, GenderOptions, IdentificationTypes } from "@/constants";
 import { SelectItem } from "../ui/select";
 import Image from "next/image";
+import { FileUploader } from "../FileUploader";
 
 const RegisterForm = ({ user }: { user: User }) => {
   const router = useRouter();
@@ -264,11 +265,38 @@ const RegisterForm = ({ user }: { user: User }) => {
           name="identificationDocument" // 待確認對應的 collection attr 名稱
           label="Scanned Copy of Identification Document"
           renderSkeleton={(field) => (
-            <FormControl>{/* FileUpload */}</FormControl>
+            <FormControl>
+              <FileUploader files={field.value} onChange={field.onChange} />
+            </FormControl>
           )}
         />
         {/* End Identification and Verification  */}
+        {/* Start Consent and Privacy */}
+        <section className="space-y-6">
+          <div className="mb-9 space-y-1">
+            <h2 className="sub-header">Consent and Privacy</h2>
+          </div>
+        </section>
 
+        <CustomFormField
+          control={form.control}
+          fieldType={FormFieldType.CHECKBOX}
+          name="treatmentConsent"
+          label="I consent to receive treatment for my health condition."
+        />
+        <CustomFormField
+          control={form.control}
+          fieldType={FormFieldType.CHECKBOX}
+          name="disclosureConsent"
+          label="I consent to the use and disclosure of my health information for treatment purposes."
+        />
+        <CustomFormField
+          control={form.control}
+          fieldType={FormFieldType.CHECKBOX}
+          name="privacyConsent"
+          label="I acknowledge that I have reviewed and agree to the privacy policy"
+        />
+        {/* end Consent and Privacy */}
         <SubmitButton isLoading={isLoading}>Get Started</SubmitButton>
       </form>
     </Form>
