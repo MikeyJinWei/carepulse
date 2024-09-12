@@ -14,8 +14,8 @@ const Register = async (
 
   return (
     <div className="h-screen max-h-screen flex">
-      <section className="my-auto container remove-scrollbar">
-        <div className="sub-container max-w-[496px]">
+      <section className="container remove-scrollbar">
+        <div className="sub-container max-w-[860px] flex-1">
           <Image
             src="/assets/icons/logo-full.svg"
             height={1000}
