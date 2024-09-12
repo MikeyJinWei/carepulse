@@ -26,15 +26,7 @@ const Register = async (
 
           <RegisterForm user={user} />
 
-          <div className="mt-20 flex justify-between xl:text-left text-14-regular">
-            <p className="justify-items-end text-dark-600">
-              © {getCurrentYear()} Carepulse
-            </p>
-
-            <Link href="/?admin=true" className="text-green-500">
-              Admin
-            </Link>
-          </div>
+          <p className="py-12 copyright">© {getCurrentYear()} Carepulse</p>
         </div>
       </section>
 

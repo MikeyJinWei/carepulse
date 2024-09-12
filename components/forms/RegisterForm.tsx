@@ -1,20 +1,26 @@
 "use client";
 
-import { z } from "zod";
+import { date, z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Form, FormControl } from "@/components/ui/form";
 import SubmitButton from "../SubmitButton";
 import { useState } from "react";
-import { UserFormValidation } from "@/lib/validation";
+import { PatientFormValidation } from "@/lib/validation";
 import { useRouter } from "next/navigation";
 import CustomFormField, { FormFieldType } from "../CustomFormField";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
-import { Doctors, GenderOptions, IdentificationTypes } from "@/constants";
+import {
+  Doctors,
+  GenderOptions,
+  IdentificationTypes,
+  PatientFormDefaultValues,
+} from "@/constants";
 import { SelectItem } from "../ui/select";
 import Image from "next/image";
 import { FileUploader } from "../FileUploader";
+import { registerPatient } from "@/lib/actions/patient.action";
 
 const RegisterForm = ({ user }: { user: User }) => {
   const router = useRouter();
@@ -22,16 +28,53 @@ const RegisterForm = ({ user }: { user: User }) => {
   // 表單提交裝態
   const [isLoading, setIsLoading] = useState(false); // 之後嘗試看看 useTransition
   // 表單欄位狀態管理
-  const form = useForm<z.infer<typeof UserFormValidation>>({
-    resolver: zodResolver(UserFormValidation),
+  const form = useForm<z.infer<typeof PatientFormValidation>>({
+    resolver: zodResolver(PatientFormValidation),
     defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
+      ...PatientFormDefaultValues, // 淺拷貝、展開初始值，免去逐欄寫 key
     },
   });
   // 表單提交 req
-  const onSubmit = async () => {};
+  const onSubmit = async (values: z.infer<typeof PatientFormValidation>) => {
+    setIsLoading(true);
+
+    // 獨立處理身分證副本資料，因為 server 以 blob 型態處理大型檔案 (e.g. 圖片)
+    let formData;
+    // 檢查身分證副本的 truthy, falsy
+    if (
+      values.identificationDocument &&
+      values.identificationDocument.length > 0
+    ) {
+      // 實例化 Blog obj 配置檔案信息
+      const blobFile = new Blob([values.identificationDocument[0]], {
+        type: values.identificationDocument[0].type, // 存取副檔名
+      });
+      // 以表單數據 - FormData obj 上傳圖片檔
+      formData = new FormData();
+      // 為表單注入新 key, value
+      formData.append("blobFile", blobFile); // https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData#examples
+      // 以原檔名為檔案命名
+      formData.append("fileName", values.identificationDocument[0].name);
+    }
+
+    try {
+      // 將要上傳的表單資料併成 obj
+      const patientData = {
+        ...values,
+        userId: user.$id,
+        birthDate: new Date(values.birthDate),
+        identificationDocument: formData,
+      };
+      // @ts-ignore
+      const patient = await registerPatient(patientData); // 發 API
+
+      if (patient) router.push(`/patients/${user.$id}/new-appointment`); // 重導
+    } catch (error) {
+      console.error(error);
+    }
+
+    setIsLoading(false);
+  };
 
   return (
     <Form {...form}>
@@ -297,7 +340,7 @@ const RegisterForm = ({ user }: { user: User }) => {
           label="I acknowledge that I have reviewed and agree to the privacy policy"
         />
         {/* end Consent and Privacy */}
-        <SubmitButton isLoading={isLoading}>Get Started</SubmitButton>
+        <SubmitButton isLoading={isLoading}>Submit and continue</SubmitButton>
       </form>
     </Form>
   );

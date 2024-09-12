@@ -1,5 +1,6 @@
 export const GenderOptions = ["Male", "Female", "Other"];
 
+// 初始掛號病人資料（還沒登記時）
 export const PatientFormDefaultValues = {
   firstName: "",
   lastName: "",
