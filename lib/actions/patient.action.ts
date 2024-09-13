@@ -46,6 +46,20 @@ export const getUser = async (userId: string) => {
   }
 };
 
+export const getPatient = async (userId: string) => {
+  try {
+    const patient = await databases.listDocuments(
+      DATABASE_ID!, // 從哪個 database req
+      PATIENT_COLLECTION_ID!, // 哪一個 collection
+      [Query.equal("userId", userId)]
+    );
+
+    return parseStringify(patient.documents[0]);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export const registerPatient = async ({
   identificationDocument, // 身分證副本
   ...patient // 其他病人資料
