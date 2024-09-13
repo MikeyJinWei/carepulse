@@ -69,7 +69,7 @@ export const registerPatient = async ({
       PATIENT_COLLECTION_ID!,
       ID.unique(),
       {
-        identificationId: file?.$id || null,
+        identificationDocumentId: file?.$id || null,
         identificationDocumentUrl: `${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${file?.$id}/view?project=${APPWRITE_PROJECT_ID}`, // 已成功上傳的身分證副本圖
         ...patient,
       }

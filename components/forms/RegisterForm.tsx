@@ -66,7 +66,7 @@ const RegisterForm = ({ user }: { user: User }) => {
         identificationDocument: formData,
       };
       // @ts-ignore
-      const patient = await registerPatient(patientData); // 發 API
+      const patient = await registerPatient(patientData); // 發 API，暫時使用 keyword 忽略型別檢查
 
       if (patient) router.push(`/patients/${user.$id}/new-appointment`); // 重導
     } catch (error) {
@@ -164,7 +164,7 @@ const RegisterForm = ({ user }: { user: User }) => {
             fieldType={FormFieldType.INPUT}
             name="address"
             label="Address"
-            placeholder="ex: 14 street, New York, NY - 5101"
+            placeholder="ex: 14th street, New York, NY - 5101"
           />
           <CustomFormField
             control={form.control}
@@ -305,7 +305,7 @@ const RegisterForm = ({ user }: { user: User }) => {
         <CustomFormField
           control={form.control}
           fieldType={FormFieldType.SKELETON}
-          name="identificationDocument" // 待確認對應的 collection attr 名稱
+          name="identificationDocument"
           label="Scanned Copy of Identification Document"
           renderSkeleton={(field) => (
             <FormControl>
