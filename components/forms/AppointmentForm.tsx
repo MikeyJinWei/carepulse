@@ -120,7 +120,7 @@ const AppointmentForm = ({ type, userId, patientId }: AppointmentFormProps) => {
             <CustomFormField
               control={form.control}
               fieldType={FormFieldType.SELECT}
-              name="doctor"
+              name="primaryPhysician"
               label="Doctor"
               placeholder="Select a doctor"
             >
