@@ -7,12 +7,12 @@ import { Form } from "@/components/ui/form";
 import CustomFormField, { FormFieldType } from "../CustomFormField";
 import SubmitButton from "../SubmitButton";
 import { useState } from "react";
-import { UserFormValidation } from "@/lib/validation";
+import { getAppointmentSchema } from "@/lib/validation";
 import { useRouter } from "next/navigation";
-import { createUser } from "@/lib/actions/patient.action";
 import { Doctors } from "@/constants";
 import { SelectItem } from "../ui/select";
 import Image from "next/image";
+import { createAppointment } from "@/lib/actions/appointment.actions";
 
 type AppointmentFormProps = {
   type: "create" | "cancel" | "schedule";
@@ -23,36 +23,63 @@ type AppointmentFormProps = {
 const AppointmentForm = ({ type, userId, patientId }: AppointmentFormProps) => {
   const router = useRouter();
 
-  // 表單提交裝態
-  const [isLoading, setIsLoading] = useState(false); // 之後嘗試看看 useTransition
-  // 表單欄位狀態管理
-  const form = useForm<z.infer<typeof UserFormValidation>>({
-    resolver: zodResolver(UserFormValidation),
+  // 表單
+  const AppointmentFormValidation = getAppointmentSchema(type); // 初始化表單綱要
+
+  const [isLoading, setIsLoading] = useState(false); // 表單提交狀態
+
+  const form = useForm<z.infer<typeof AppointmentFormValidation>>({
+    resolver: zodResolver(AppointmentFormValidation),
     defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
+      primaryPhysician: "",
+      schedule: new Date(Date.now()),
+      reason: "",
+      note: "",
+      cancellationReason: "",
     },
-  });
+  }); // 表單欄位狀態管理
+
   // 表單提交 req
-  const onSubmit = async ({
-    name,
-    email,
-    phone,
-  }: z.infer<typeof UserFormValidation>) => {
+  const onSubmit = async (
+    values: z.infer<typeof AppointmentFormValidation>
+  ) => {
     setIsLoading(true);
 
+    // status variable 控制使用者想對表單做什麼操作
+    let status;
+    switch (type) {
+      case "schedule":
+        status = "scheduled";
+        break;
+      case "cancel":
+        status = "cancelled";
+      default:
+        status = "pending";
+    }
+
     try {
-      const userData = {
-        name,
-        email,
-        phone,
-      }; // 檢查必要表單資料 truthy, falsy
+      // if...else 依據使用者想操作的類別實現邏輯
+      // 提交預約前先檢查 patientId, i.e. 病人資料是否已成功創建
+      if (type === "create" && patientId) {
+        const appointmentData = {
+          userId,
+          patient: patientId,
+          primaryPhysician: values.primaryPhysician,
+          schedule: new Date(values.schedule),
+          reason: values.reason!,
+          note: values.note,
+          status: status as Status,
+        };
 
-      // fetch api
-      const newUser = await createUser(userData); // 將 variable 修正成更明確的 naming
+        const newAppointment = await createAppointment(appointmentData); // fetch api
 
-      if (newUser) router.push(`/patients/${newUser.$id}/register`); // 重導路由
+        if (newAppointment) {
+          form.reset(); // 還原各欄位值到初始值 - defaultValues
+          router.push(
+            `/patients/${userId}/new-appointment/success?appointmentId=${newAppointment.$id}`
+          ); // 創建成功後重導
+        }
+      }
     } catch (error) {
       console.error(error);
     }
@@ -133,7 +160,7 @@ const AppointmentForm = ({ type, userId, patientId }: AppointmentFormProps) => {
               <CustomFormField
                 control={form.control}
                 fieldType={FormFieldType.TEXTAREA}
-                name="notes"
+                name="note"
                 label="Additional comments/notes"
                 placeholder="ex: Ibuprofen 200mg, Levothyroxine 50mcg"
               />

@@ -1,5 +1,5 @@
 import RegisterForm from "@/components/forms/RegisterForm";
-import { getUser } from "@/lib/actions/patient.action";
+import { getUser } from "@/lib/actions/patient.actions";
 import { getCurrentYear } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
