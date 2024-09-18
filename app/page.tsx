@@ -1,12 +1,15 @@
 import PatientForm from "@/components/forms/PatientForm";
+import PasskeyModal from "@/components/PasskeyModal";
 import { getCurrentYear } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function Home() {
+export default function Home({ searchParams }: SearchParamProps) {
+  const isAdmin = searchParams.admin === "true"; // 存取 URL ? 後的部分，i.e. 查詢參數
+
   return (
     <div className="h-screen max-h-screen flex">
-      {/* PasskeyModal - OTP Verification */}
+      {isAdmin && <PasskeyModal />}
 
       <section className="my-auto container remove-scrollbar">
         <div className="sub-container max-w-[496px]">
