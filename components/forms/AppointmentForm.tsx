@@ -12,15 +12,27 @@ import { useRouter } from "next/navigation";
 import { Doctors } from "@/constants";
 import { SelectItem } from "../ui/select";
 import Image from "next/image";
-import { createAppointment } from "@/lib/actions/appointment.actions";
+import {
+  createAppointment,
+  updateAppointment,
+} from "@/lib/actions/appointment.actions";
+import { Appointment } from "@/types/appwrite.types";
 
 type AppointmentFormProps = {
   type: "create" | "cancel" | "schedule";
   userId: string;
   patientId: string;
+  appointment: Appointment;
+  setOpen: (open: boolean) => void;
 };
 
-const AppointmentForm = ({ type, userId, patientId }: AppointmentFormProps) => {
+const AppointmentForm = ({
+  type,
+  userId,
+  patientId,
+  appointment,
+  setOpen,
+}: AppointmentFormProps) => {
   const router = useRouter();
 
   // 表單
@@ -31,11 +43,12 @@ const AppointmentForm = ({ type, userId, patientId }: AppointmentFormProps) => {
   const form = useForm<z.infer<typeof AppointmentFormValidation>>({
     resolver: zodResolver(AppointmentFormValidation),
     defaultValues: {
-      primaryPhysician: "",
-      schedule: new Date(Date.now()),
-      reason: "",
-      note: "",
-      cancellationReason: "",
+      // 存取已由病人提交的表單資料
+      primaryPhysician: appointment ? appointment.primaryPhysician : "",
+      schedule: appointment ? new Date(appointment.schedule) : new Date(),
+      reason: appointment ? appointment.reason : "",
+      note: appointment ? appointment.note : "",
+      cancellationReason: appointment?.cancellationReason || "",
     },
   }); // 表單欄位狀態管理
 
@@ -45,7 +58,7 @@ const AppointmentForm = ({ type, userId, patientId }: AppointmentFormProps) => {
   ) => {
     setIsLoading(true);
 
-    // status variable 控制使用者想對表單做什麼操作
+    // 控制使用者想對表單做什麼操作
     let status;
     switch (type) {
       case "schedule":
@@ -53,6 +66,7 @@ const AppointmentForm = ({ type, userId, patientId }: AppointmentFormProps) => {
         break;
       case "cancel":
         status = "cancelled";
+        break;
       default:
         status = "pending";
     }
@@ -79,9 +93,29 @@ const AppointmentForm = ({ type, userId, patientId }: AppointmentFormProps) => {
             `/patients/${userId}/new-appointment/success?appointmentId=${newAppointment.$id}`
           ); // 創建成功後重導
         }
+      } else {
+        // 將即將提交的表單資料併成 object
+        const appointmentToUpdate = {
+          userId,
+          appointmentId: appointment?.$id!,
+          appointment: {
+            primaryPhysician: values?.primaryPhysician,
+            schedule: new Date(values?.schedule),
+            status: status as Status,
+            cancellationReason: values.cancellationReason,
+          },
+          type,
+        };
+
+        const updatedAppointment = await updateAppointment(appointmentToUpdate);
+
+        if (updatedAppointment) {
+          setOpen && setOpen(false);
+          form.reset();
+        }
       }
     } catch (error) {
-      console.error(error);
+      console.log(error);
     }
 
     setIsLoading(false); // 結束提交狀態
@@ -89,7 +123,6 @@ const AppointmentForm = ({ type, userId, patientId }: AppointmentFormProps) => {
 
   // 依據使用者目的決定提交按鈕內文
   let buttonLabel;
-
   switch (type) {
     case "cancel":
       buttonLabel = "Cancel Appointment";
@@ -106,12 +139,15 @@ const AppointmentForm = ({ type, userId, patientId }: AppointmentFormProps) => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 flex-1">
-        <section className="mb-2 space-y-4">
-          <h1 className="header">New Appointment</h1>
-          <p className="text-dark-700">
-            Request a new appointment in 10 seconds
-          </p>
-        </section>
+        {/* 創建約診時才渲染提示 */}
+        {type === "create" && (
+          <section className="mb-2 space-y-4">
+            <h1 className="header">New Appointment</h1>
+            <p className="text-dark-700">
+              Request a new appointment in 10 seconds
+            </p>
+          </section>
+        )}
 
         {/* 根據使用者目的條件渲染表單元素 */}
         {type !== "cancel" && (

@@ -45,7 +45,7 @@ const PatientForm = () => {
 
       if (newUser) router.push(`/patients/${newUser.$id}/register`); // 重導路由
     } catch (error) {
-      console.error(error);
+      console.log(error);
     }
 
     setIsLoading(false); // 結束提交狀態

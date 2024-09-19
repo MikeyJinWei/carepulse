@@ -70,7 +70,7 @@ const RegisterForm = ({ user }: { user: User }) => {
 
       if (patient) router.push(`/patients/${user.$id}/new-appointment`); // 重導
     } catch (error) {
-      console.error(error);
+      console.log(error);
     }
 
     setIsLoading(false);

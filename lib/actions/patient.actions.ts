@@ -91,6 +91,6 @@ export const registerPatient = async ({
 
     return parseStringify(newPatient);
   } catch (error) {
-    console.error(error);
+    console.log(error);
   }
 };
