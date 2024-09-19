@@ -16,7 +16,7 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { encryptKey } from "@/lib/utils";
+import { decryptKey, encryptKey } from "@/lib/utils";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -28,24 +28,27 @@ const PasskeyModal = () => {
   const [passkey, setPasskey] = useState(""); // 管理驗證碼輸入
   const [error, setError] = useState(""); // 驗證碼錯誤信息
 
+  // 已登入驗證且驗證碼尚未過期
   const encryptedKey =
-    typeof window !== "undefined"
-      ? window.localStorage.getItem("accessKey")
+    typeof window !== "undefined" // 確保只在瀏覽器環境中執行，避免在 SSR 時發生錯誤
+      ? window.localStorage.getItem("accessKey") // localStorage 只能在瀏覽器環境中訪問
       : null;
 
   useEffect(() => {
+    const accessKey = encryptedKey && decryptKey(encryptedKey); // 解碼
+
     if (path) {
-      // 檢查使用者輸入的驗證碼
-      if (passkey === process.env.NEXT_PUBLIC_ADMIN_PASSKEY) {
+      // 檢查
+      if (accessKey === process.env.NEXT_PUBLIC_ADMIN_PASSKEY) {
         setOpen(false); // 成功後關閉 Modal
         router.push("/admin");
       } else {
-        setOpen(true);
+        setOpen(true); // 保持 Modal 開啟等待輸入 -> 驗證
       }
     }
-  }, [encryptedKey]);
+  }, [encryptedKey]); // 依賴驗證碼的變化
 
-  // 驗證驗證碼
+  // 從未登入驗證／驗證碼過期
   const validatePasskey = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
@@ -62,6 +65,7 @@ const PasskeyModal = () => {
       setError("Invalid passkey. Please try again.");
     }
   };
+
   // 關閉 Modal
   const handleClose = () => {
     setOpen(false);
