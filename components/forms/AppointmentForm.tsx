@@ -45,9 +45,11 @@ const AppointmentForm = ({
     defaultValues: {
       // 存取已由病人提交的表單資料
       primaryPhysician: appointment ? appointment.primaryPhysician : "",
-      schedule: appointment ? new Date(appointment.schedule) : new Date(),
+      schedule: appointment
+        ? new Date(appointment?.schedule)
+        : new Date(Date.now()),
       reason: appointment ? appointment.reason : "",
-      note: appointment ? appointment.note : "",
+      note: appointment?.note || "",
       cancellationReason: appointment?.cancellationReason || "",
     },
   }); // 表單欄位狀態管理
